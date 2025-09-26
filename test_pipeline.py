@@ -4,6 +4,8 @@ from langchain.agents import create_react_agent, AgentExecutor
 from langchain import hub
 from langcahin_wrappers import make_tools
 from logger import logger
+from mlflow import MlflowClient
+
 
 # Load Qwen2 model + tokenizer (CPU only, fp16 disabled)
 model_id = "Qwen/Qwen2-1.5B"
@@ -46,22 +48,26 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--experiment-id", required=True,
+    parser.add_argument("--experiment-name", required=True,
                         help="MLflow experiment id")
     parser.add_argument("--action", default="summarize",
                         choices=["summarize", "recommend", "raw"])
     args = parser.parse_args()
 
+    client = MlflowClient()
+    experiment_id = client.get_experiment_by_name(
+        args.experiment_name)._experiment_id
+
     # Test
     if args.action == "summarize":
         out = agent_executor.invoke(
-            {"input": f"summarize_runs experiment_id={args.experiment_id}"})
-        logger.info(out)
+            {"input": f"summarize_runs experiment_id={experiment_id}"})
+        logger.info(out['output'])
     elif args.action == "recommend":
         out = agent_executor.invoke({"input":
-                                     f"recommend_hparams experiment_id={args.experiment_id}"}) # NOQA E501
-        logger.info(out)
+                                     f"recommend_hparams experiment_id={experiment_id}"})  # NOQA E501
+        logger.info(out['output'])
     elif args.action == "raw":
         out = agent_executor.invoke({"input":
-                                     f"get_runs_summary experiment_id={args.experiment_id}"}) # NOQA E501
-        logger.info(out)
+                                     f"get_runs_summary experiment_id={experiment_id}"})  # NOQA E501
+        logger.info(out['output'])

@@ -7,3 +7,4 @@ langchain
 transformers
 accelerate
 tqdm
+langchain_huggingface
