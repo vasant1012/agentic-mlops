@@ -4,7 +4,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 
 now = datetime.now()
-time_for_filename = now.strftime("%Y-%m-%d-%H-%M")
+time_for_filename = now.strftime("%Y-%m-%d")
 
 # Ensure 'logs' folder exists
 log_dir = "logs"

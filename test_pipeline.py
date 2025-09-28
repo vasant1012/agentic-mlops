@@ -3,7 +3,7 @@ from langchain_huggingface import HuggingFacePipeline
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain import hub
 from langcahin_wrappers import make_tools
-from logger import logger
+from agents.logger import logger
 from mlflow import MlflowClient
 
 

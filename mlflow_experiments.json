@@ -1,0 +1,57 @@
+{
+    "run_0": {
+        "run_id": "b16745ca23874eae845a15a32e181970",
+        "params": {
+            "max_iter": "100",
+            "C": "0.01"
+        },
+        "metrics": {
+            "log_loss": 0.6372245660525404,
+            "accuracy": 0.8222222222222222
+        }
+    },
+    "run_1": {
+        "run_id": "d9f9163095b44983824e2198020e72c3",
+        "params": {
+            "max_iter": "100",
+            "C": "0.01"
+        },
+        "metrics": {
+            "log_loss": 0.6372245660525404,
+            "accuracy": 0.8222222222222222
+        }
+    },
+    "run_2": {
+        "run_id": "49723779d4e447a286fa3b90355713d0",
+        "params": {
+            "max_iter": "300",
+            "C": "0.01"
+        },
+        "metrics": {
+            "log_loss": 0.6372245660525404,
+            "accuracy": 0.8222222222222222
+        }
+    },
+    "run_3": {
+        "run_id": "ebe2f1075ae34c4dadabf33d50d253e8",
+        "params": {
+            "max_iter": "200",
+            "C": "1.0"
+        },
+        "metrics": {
+            "log_loss": 0.11522328920573366,
+            "accuracy": 1.0
+        }
+    },
+    "run_4": {
+        "run_id": "9fa5dc27108a4fb0be89497dfc8c6d5a",
+        "params": {
+            "max_iter": "100",
+            "C": "10.0"
+        },
+        "metrics": {
+            "log_loss": 0.0350375429843396,
+            "accuracy": 1.0
+        }
+    }
+}
