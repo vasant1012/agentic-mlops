@@ -3,14 +3,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFacePipeline
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
-from tools.mlflow_tools import load_mlflow_experiments_from_json, query_mlflow_experiment
+from tools.mlflow_tools import load_mlflow_experiments_from_json, query_mlflow_experiment  # NOQA E501
 from tools.analysis_tool import analyze_experiment_performance
-
 
 
 class MLflowAnalysisAgent:
     """
-    A LangChain agent for analyzing MLflow experiments using Hugging Face transformers.
+    A LangChain agent for analyzing MLflow experiments using Hugging Face transformers. # NOQA E501
     """
 
     def __init__(
@@ -18,13 +17,14 @@ class MLflowAnalysisAgent:
         model_name: str = "Qwen/Qwen2-1.5B-Instruct",
         max_length: int = 4096,
         temperature: float = 0.1,
+        chain_iter=3,
         device: str = "auto",
     ):
         """
         Initialize the MLflow Analysis Agent with Hugging Face transformers.
 
         Args:
-            model_name: Hugging Face model name (default: Qwen2-1.5B for CPU efficiency)
+            model_name: Hugging Face model name (default: Qwen2-1.5B for CPU efficiency) # NOQA E501
             max_length: Maximum sequence length for generation
             temperature: Temperature for text generation (0.0 to 1.0)
             device: Device to run on ("cpu", "cuda", or "auto")
@@ -36,6 +36,7 @@ class MLflowAnalysisAgent:
         self.llm = None
         self.agent = None
         self.agent_executor = None
+        self.chain_iter = chain_iter
         self._setup_agent()
 
     def _get_device(self, device: str) -> str:
@@ -52,7 +53,7 @@ class MLflowAnalysisAgent:
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,
+            torch_dtype=torch.float16 if self.device == "cuda" else torch.float32,  # NOQA E501
             device_map=self.device if self.device == "cuda" else None,
             trust_remote_code=True,
         )
@@ -81,7 +82,7 @@ class MLflowAnalysisAgent:
         ]
 
         # Create ReAct prompt template
-        template = """Answer the following questions as best you can. You have access to the following tools:
+        template = """Answer the following questions as best you can. You have access to the following tools: # NOQA E501
 
             {tools}
 
@@ -92,7 +93,7 @@ class MLflowAnalysisAgent:
             Action: the action to take, should be one of [{tool_names}]
             Action Input: the input to the action
             Observation: the result of the action
-            ... (this Thought/Action/Action Input/Observation can repeat N times)
+            ... (this Thought/Action/Action Input/Observation can repeat {self.chain_iter} times)
             Thought: I now know the final answer
             Final Answer: the final answer to the original input question
 
@@ -115,7 +116,8 @@ class MLflowAnalysisAgent:
         )
 
         # Create agent
-        self.agent = create_react_agent(llm=self.llm, tools=tools, prompt=prompt)
+        self.agent = create_react_agent(
+            llm=self.llm, tools=tools, prompt=prompt)
 
         # Create agent executor
         self.agent_executor = AgentExecutor(
@@ -140,7 +142,7 @@ class MLflowAnalysisAgent:
             Analysis results as string
         """
         query = f"""
-        Please load the MLflow experiments data from the JSON file '{json_file_path}' 
+        Please load the MLflow experiments data from the JSON file '{json_file_path}' # NOQA E501
         and provide a comprehensive analysis of the experimental results including:
         1. Performance summary
         2. Best runs identification
@@ -168,7 +170,7 @@ class MLflowAnalysisAgent:
         query = f"""
         Please query the MLflow experiment with ID '{experiment_id}' 
         (retrieve top {top_n} runs) and provide a comprehensive analysis 
-        of the experimental results including performance trends and recommendations.
+        of the experimental results including performance trends and recommendations. # NOQA E501
         """
 
         try:

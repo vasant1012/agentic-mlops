@@ -2,6 +2,7 @@ import json
 from typing import List, Dict, Any
 from mlflow import MlflowClient
 
+
 def format_runs_for_llm(runs: List[Dict[str, Any]], max_runs: int = 10) -> str:
     exp_dict = {}
     for i in range(len(runs[:max_runs])):
@@ -15,11 +16,13 @@ def format_runs_for_llm(runs: List[Dict[str, Any]], max_runs: int = 10) -> str:
         json.dump(exp_dict, json_file, indent=4)
     return exp_dict
 
-def get_runs_summary(experiment_name: str, top_n: int = 20) -> List[Dict[str, Any]]:
+
+def get_runs_summary(experiment_name: str, top_n: int = 20) -> List[Dict[str, Any]]: # NOQA E501
     client = MlflowClient()
-    experiment_id = client.get_experiment_by_name(experiment_name)._experiment_id
+    experiment_id = client.get_experiment_by_name(
+        experiment_name)._experiment_id
     runs = client.search_runs(
-        [experiment_id], order_by=["attributes.start_time DESC"], max_results=top_n
+        [experiment_id], order_by=["attributes.start_time DESC"], max_results=top_n # NOQA E501
     )
     out = []
     for r in runs:
