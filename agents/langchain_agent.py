@@ -5,7 +5,7 @@ from langchain_core.globals import set_debug, set_verbose
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 # from tools.mlflow_tools import load_mlflow_experiments_from_json, query_mlflow_experiment  # NOQA E501
-from tools.analysis_tool import analyze_experiment_performance, read_mlflow_logs
+from tools.analysis_tool import analyze_experiment_performance #, read_mlflow_logs
 
 
 class MLflowAnalysisAgent:
@@ -76,18 +76,18 @@ class MLflowAnalysisAgent:
 
         # Define available tools
         tools = [
-            read_mlflow_logs,
+            # read_mlflow_logs,
             # load_mlflow_experiments_from_json,
             # query_mlflow_experiment,
             analyze_experiment_performance,
         ]
 
         # Create ReAct prompt template
-        template = """Answer the following questions as best you can. You have access to the following tools: # NOQA E501
+        template = """Answer the following questions as best you can. You have access to the following tools:
 
             {tools}
 
-            Use the following format:
+            Use the following format exactly:
 
             Question: the input question you must answer
             Thought: you should always think about what to do
@@ -96,14 +96,29 @@ class MLflowAnalysisAgent:
             Observation: the result of the action
             ... (this Thought/Action/Action Input/Observation can repeat 2 times)
             Thought: I now know the final answer
-            Final Answer: the final answer to the original input question
+            Final Answer: respond strictly as a JSON object with this structure:
+            {{
+            "summary": "text summary of what you analyzed",
+            "best_run": {{
+                "run_id": "id or description of best run",
+                "metrics": {{ "metric_name": value }},
+                "params": {{ "param_name": value }}
+            }},
+            "insights": [
+                "key finding 1",
+                "key finding 2",
+                "key finding 3"
+            ]
+            }}
+
+            IMPORTANT: Do not include any text outside the JSON object.
 
             Begin reasoning now.
-            (IMPORTANT: Always respond in this format exactly!)
+            (IMPORTANT: Only produce 'Final Answer' at the end in JSON format. Do NOT include Action or Observation steps.)
             {agent_scratchpad}
 
             Question: {input}
-            Thought (your reasoning):
+            Thought:
             """
 
         prompt = PromptTemplate(
@@ -138,8 +153,8 @@ class MLflowAnalysisAgent:
             tools=tools,
             verbose=True,
             handle_parsing_errors=True,
-            max_iterations=2,
-            early_stopping_method="generate",
+            max_iterations=1,
+            early_stopping_method="force",
         )
 
         print("Agent setup complete!")
