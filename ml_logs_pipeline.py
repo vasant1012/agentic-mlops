@@ -27,7 +27,7 @@ def main():
         from agents.langchain_agent import MLflowAnalysisAgent
 
         agent = MLflowAnalysisAgent(
-            model_name="Qwen/Qwen2-1.5B-Instruct", chain_iter=1)
+            model_name="Qwen/Qwen2-1.5B-Instruct")
         result = agent.analyze_from_json(json_file)
         print(result)
     elif choice == "2":

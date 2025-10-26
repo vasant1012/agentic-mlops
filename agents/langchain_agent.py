@@ -1,23 +1,24 @@
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from langchain_huggingface import HuggingFacePipeline
+from langchain_core.globals import set_debug, set_verbose
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
-from tools.mlflow_tools import load_mlflow_experiments_from_json, query_mlflow_experiment  # NOQA E501
-from tools.analysis_tool import analyze_experiment_performance
+# from tools.mlflow_tools import load_mlflow_experiments_from_json, query_mlflow_experiment  # NOQA E501
+from tools.analysis_tool import analyze_experiment_performance, read_mlflow_logs
 
 
 class MLflowAnalysisAgent:
     """
     A LangChain agent for analyzing MLflow experiments using Hugging Face transformers. # NOQA E501
     """
-
+    set_debug(True)
+    set_verbose(True)
     def __init__(
         self,
         model_name: str = "Qwen/Qwen2-1.5B-Instruct",
         max_length: int = 4096,
         temperature: float = 0.1,
-        chain_iter=3,
         device: str = "auto",
     ):
         """
@@ -36,7 +37,6 @@ class MLflowAnalysisAgent:
         self.llm = None
         self.agent = None
         self.agent_executor = None
-        self.chain_iter = chain_iter
         self._setup_agent()
 
     def _get_device(self, device: str) -> str:
@@ -76,8 +76,9 @@ class MLflowAnalysisAgent:
 
         # Define available tools
         tools = [
-            load_mlflow_experiments_from_json,
-            query_mlflow_experiment,
+            read_mlflow_logs,
+            # load_mlflow_experiments_from_json,
+            # query_mlflow_experiment,
             analyze_experiment_performance,
         ]
 
@@ -93,16 +94,17 @@ class MLflowAnalysisAgent:
             Action: the action to take, should be one of [{tool_names}]
             Action Input: the input to the action
             Observation: the result of the action
-            ... (this Thought/Action/Action Input/Observation can repeat {self.chain_iter} times)
+            ... (this Thought/Action/Action Input/Observation can repeat 2 times)
             Thought: I now know the final answer
             Final Answer: the final answer to the original input question
 
-            Begin!
-
+            Begin reasoning now.
+            (IMPORTANT: Always respond in this format exactly!)
             {agent_scratchpad}
 
             Question: {input}
-            Thought:"""
+            Thought (your reasoning):
+            """
 
         prompt = PromptTemplate(
             template=template,
@@ -115,17 +117,28 @@ class MLflowAnalysisAgent:
             },
         )
 
+        print("Prompt input variables:", prompt.input_variables)
+
         # Create agent
         self.agent = create_react_agent(
             llm=self.llm, tools=tools, prompt=prompt)
+        
+        # prompt_text = prompt.format(
+        #     input="Read mlflow_experiments.json and summarize metrics.",
+        #     agent_scratchpad=""
+        # )
+        # print(prompt_text)
+        # response = self.llm.invoke(prompt_text)
+        # print("LLM raw output:", response)
 
+        
         # Create agent executor
         self.agent_executor = AgentExecutor(
             agent=self.agent,
             tools=tools,
             verbose=True,
             handle_parsing_errors=True,
-            max_iterations=5,
+            max_iterations=2,
             early_stopping_method="generate",
         )
 
@@ -147,7 +160,6 @@ class MLflowAnalysisAgent:
         1. Performance summary
         2. Best runs identification
         3. Parameter impact analysis
-        4. Recommendations for improvement
         """
 
         try:

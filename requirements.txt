@@ -7,6 +7,7 @@ langchain==0.2.15
 langchain-community==0.2.15
 langchain-core==0.2.38
 langgraph==0.0.69
+langchain_huggingface
 
 # Web framework (for API if needed)
 flask==3.0.3
