@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from utils.logger import logger
 from utils.mlflow_utils import get_runs_summary, format_runs_for_llm
 
@@ -24,12 +25,17 @@ def main():
     choice = input("Enter choice (1 or 2): ").strip()
 
     if choice == "1":
-        from agents.langchain_agent import MLflowAnalysisAgent
+        from agents.mlflow_agent import MLflowAnalysisAgent
 
         agent = MLflowAnalysisAgent(
             model_name="Qwen/Qwen2-1.5B-Instruct")
+        start_time = time.time()
         result = agent.analyze_from_json(json_file)
+        print('Response from agent:')
+        print('-------------------------------------------------------------------------') # NOQA E501
         print(result)
+        print(f'results generated in {round((time.time() - start_time), 2)} seconds.') # NOQA E501
+        print('-------------------------------------------------------------------------') # NOQA E501
     elif choice == "2":
         from agents.direct_analyzer import DirectTransformerMLflowAnalyzer
 

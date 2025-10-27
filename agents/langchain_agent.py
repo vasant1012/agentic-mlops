@@ -5,7 +5,7 @@ from langchain_core.globals import set_debug, set_verbose
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 import torch
 # from tools.mlflow_tools import load_mlflow_experiments_from_json, query_mlflow_experiment  # NOQA E501
-from tools.analysis_tool import analyze_experiment_performance #, read_mlflow_logs
+from tools.analysis_tool import analyze_experiment_performance  # read_mlflow_logs # NOQA E501
 
 
 class MLflowAnalysisAgent:
@@ -14,6 +14,7 @@ class MLflowAnalysisAgent:
     """
     set_debug(True)
     set_verbose(True)
+
     def __init__(
         self,
         model_name: str = "Qwen/Qwen2-1.5B-Instruct",
@@ -83,7 +84,8 @@ class MLflowAnalysisAgent:
         ]
 
         # Create ReAct prompt template
-        template = """Answer the following questions as best you can. You have access to the following tools:
+        template = """Answer the following questions as best you can.
+            You have access to the following tools:
 
             {tools}
 
@@ -94,9 +96,10 @@ class MLflowAnalysisAgent:
             Action: the action to take, should be one of [{tool_names}]
             Action Input: the input to the action
             Observation: the result of the action
-            ... (this Thought/Action/Action Input/Observation can repeat 2 times)
+            (this Thought/Action/Action Input/Observation can repeat 2 times)
             Thought: I now know the final answer
-            Final Answer: respond strictly as a JSON object with this structure:
+            Final Answer: respond strictly as a JSON object
+            with this structure:
             {{
             "summary": "text summary of what you analyzed",
             "best_run": {{
@@ -114,7 +117,8 @@ class MLflowAnalysisAgent:
             IMPORTANT: Do not include any text outside the JSON object.
 
             Begin reasoning now.
-            (IMPORTANT: Only produce 'Final Answer' at the end in JSON format. Do NOT include Action or Observation steps.)
+            (IMPORTANT: Only produce 'Final Answer' at the end in JSON format.
+              Do NOT include Action or Observation steps.)
             {agent_scratchpad}
 
             Question: {input}
@@ -137,7 +141,7 @@ class MLflowAnalysisAgent:
         # Create agent
         self.agent = create_react_agent(
             llm=self.llm, tools=tools, prompt=prompt)
-        
+
         # prompt_text = prompt.format(
         #     input="Read mlflow_experiments.json and summarize metrics.",
         #     agent_scratchpad=""
@@ -146,7 +150,6 @@ class MLflowAnalysisAgent:
         # response = self.llm.invoke(prompt_text)
         # print("LLM raw output:", response)
 
-        
         # Create agent executor
         self.agent_executor = AgentExecutor(
             agent=self.agent,
@@ -154,7 +157,7 @@ class MLflowAnalysisAgent:
             verbose=True,
             handle_parsing_errors=True,
             max_iterations=1,
-            early_stopping_method="force",
+            early_stopping_method="generate",
         )
 
         print("Agent setup complete!")
